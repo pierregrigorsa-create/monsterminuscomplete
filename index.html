@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Monster Minus — Grade 1 Subtraction</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#0d1b0d,#1a2e1a);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px 8px 24px;}
+
+#stage{width:100%;max-width:860px;background:#f0fff0;border-radius:22px;overflow:hidden;position:relative;box-shadow:0 24px 70px rgba(0,0,0,0.75);display:flex;flex-direction:column;}
+
+.float-sym{position:absolute;font-family:'Fredoka One',cursive;opacity:0.04;pointer-events:none;animation:float-up 12s linear infinite;color:#2ECC71;}
+@keyframes float-up{from{transform:translateY(110%) rotate(-10deg);}to{transform:translateY(-10%) rotate(10deg);}}
+
+.scene{display:none;flex-direction:column;flex:1;}
+.scene.active{display:flex;}
+
+.hband{width:100%;padding:13px 22px 11px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;}
+.hband h1{font-family:'Fredoka One',cursive;font-size:clamp(16px,2.4vw,25px);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,0.35);}
+.hband p{font-size:clamp(11px,1.3vw,13px);color:rgba(255,255,255,0.92);font-weight:700;margin-top:2px;}
+
+.content{display:flex;flex-direction:column;align-items:center;padding:12px 18px 16px;gap:12px;}
+
+/* ── MONSTER BUBBLE ── */
+.monster-bubble{
+  background:linear-gradient(135deg,#1B4D1B,#2D6A2D);
+  border-radius:18px 18px 18px 4px;
+  padding:14px 20px;
+  box-shadow:0 4px 18px rgba(0,0,0,0.3),inset 0 1px 0 rgba(0,255,0,0.15);
+  border:2px solid #4CAF50;
+  font-size:clamp(13px,1.65vw,17px);
+  line-height:1.7;color:#E8FFE8;font-weight:700;
+  width:100%;min-height:62px;
+}
+
+/* ── STORY CARD ── */
+.story-card{background:#fff;border-radius:16px;border:3px solid #4CAF50;padding:14px 18px;width:100%;box-shadow:0 4px 16px rgba(46,204,113,0.2);}
+.story-text{font-size:clamp(14px,1.8vw,18px);font-weight:800;color:#1B4D1B;text-align:center;line-height:1.6;}
+.story-emoji{font-size:clamp(26px,3.5vw,40px);text-align:center;letter-spacing:4px;margin-bottom:6px;}
+
+/* ── SUM DISPLAY ── */
+.sum-display{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.sum-num{display:inline-flex;align-items:center;justify-content:center;width:72px;height:80px;border-radius:14px;font-family:'Fredoka One',cursive;font-size:44px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.22);border:3px solid rgba(255,255,255,0.4);flex-shrink:0;}
+.sum-op{font-family:'Fredoka One',cursive;font-size:52px;color:#E8112D;text-shadow:0 2px 8px rgba(232,17,45,0.5);line-height:1;}
+.sum-eq{font-family:'Fredoka One',cursive;font-size:48px;color:#27AE60;}
+.sum-box{width:80px;height:80px;border-radius:14px;font-family:'Fredoka One',cursive;font-size:44px;border:3px dashed #999;background:#F8FFF8;display:inline-flex;align-items:center;justify-content:center;color:#1B4D1B;transition:all 0.4s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;}
+.sum-box.revealed{border-style:solid;border-color:#27AE60;background:linear-gradient(145deg,#d4f5e2,#a8e8c4);color:#155724;box-shadow:0 5px 16px rgba(40,167,69,0.3);animation:drop-in 0.45s cubic-bezier(.34,1.56,.64,1);}
+@keyframes drop-in{from{transform:scale(1.4) translateY(-18px);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.num-in-head{display:inline-flex;align-items:center;justify-content:center;width:64px;height:72px;border-radius:12px;font-family:'Fredoka One',cursive;font-size:38px;color:#fff;animation:head-zoom 0.5s cubic-bezier(.34,1.56,.64,1);border:3px solid rgba(255,255,255,0.5);}
+@keyframes head-zoom{from{transform:scale(0.4) translateY(-30px);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.finger-count{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;background:#fff;border-radius:14px;padding:10px 16px;border:2px solid #ddd;}
+.finger-num{font-family:'Fredoka One',cursive;font-size:32px;padding:6px 16px;border-radius:10px;animation:finger-pop 0.35s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes finger-pop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* ── ACTIVITY ── */
+.activity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;width:100%;}
+.act-card{background:#fff;border-radius:16px;padding:14px 16px;border:3px solid #E0E0E0;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 3px 12px rgba(0,0,0,0.07);transition:border-color 0.3s;}
+.act-card.correct{border-color:#27AE60;background:linear-gradient(145deg,#f0fff4,#fff);}
+.act-card.wrong-state{border-color:#E74C3C;background:linear-gradient(145deg,#fff5f5,#fff);}
+.act-sum-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;}
+.act-num{font-family:'Fredoka One',cursive;font-size:34px;color:#1B4D1B;}
+.act-op{font-family:'Fredoka One',cursive;font-size:34px;color:#E8112D;}
+.act-eq{font-family:'Fredoka One',cursive;font-size:34px;color:#27AE60;}
+.act-input{width:64px;height:64px;border-radius:12px;font-family:'Fredoka One',cursive;font-size:34px;text-align:center;border:3px dashed #ADB5BD;background:#F8FFF8;color:#1B4D1B;outline:none;transition:all 0.25s;}
+.act-input:focus{border-color:#4CAF50;border-style:solid;background:#F0FFF0;box-shadow:0 0 0 3px rgba(76,175,80,0.25);}
+.act-input.correct{border-style:solid;border-color:#27AE60;background:linear-gradient(145deg,#d4f5e2,#a8e8c4);color:#155724;}
+.act-input.wrong{border-style:solid;border-color:#E74C3C;background:#FFE8E8;animation:shake 0.4s ease-in-out;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.act-hint{font-size:12px;font-weight:800;color:#999;text-align:center;min-height:16px;}
+.act-hint.show-hint{color:#E67E22;}
+.check-btn{padding:7px 18px;border-radius:50px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;box-shadow:0 3px 10px rgba(76,175,80,0.35);transition:all 0.18s;}
+.check-btn:hover{transform:translateY(-2px);}
+.check-btn:disabled{opacity:0.5;cursor:default;transform:none;}
+
+#prog-wrap{width:100%;height:6px;background:rgba(0,0,0,0.1);flex-shrink:0;}
+#prog-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#2ECC71);width:0%;transition:width 0.5s linear;border-radius:0 4px 4px 0;}
+
+.confetti-text{font-family:'Fredoka One',cursive;font-size:clamp(18px,2.6vw,30px);animation:rainbow 1.5s linear infinite;}
+@keyframes rainbow{0%{color:#4CAF50;}25%{color:#E8112D;}50%{color:#FFD700;}75%{color:#9B59B6;}100%{color:#4CAF50;}}
+
+/* ── FRUIT CHOMP ANIMATION ── */
+.fruit-item{
+  position:relative; display:inline-flex;
+  align-items:center; justify-content:center;
+  font-size:2em; line-height:1;
+}
+.chomp-line{
+  position:absolute;
+  top:50%; left:-8%;
+  width:0%; height:5px;
+  background:#E8112D;
+  border-radius:3px;
+  transform:translateY(-50%) rotate(-12deg);
+  transition:width 0.45s cubic-bezier(0.22,0.61,0.36,1);
+  box-shadow:0 1px 6px rgba(232,17,45,0.55);
+  pointer-events:none;
+}
+.fruit-item.chomped .chomp-line{width:116%;}
+.fruit-item.chomped{opacity:0.55;transition:opacity 0.4s ease;}
+#controls-bar{width:100%;max-width:860px;background:rgba(255,255,255,0.05);border-radius:0 0 16px 16px;padding:10px 16px 13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ctrl{padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;border:none;cursor:pointer;transition:all 0.18s;box-shadow:0 3px 10px rgba(0,0,0,0.25);display:inline-flex;align-items:center;gap:5px;}
+.ctrl:hover{transform:translateY(-2px);filter:brightness(1.08);}
+.ctrl:active{transform:scale(0.96);}
+.ctrl-play{background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;}
+.ctrl-pause{background:linear-gradient(135deg,#FFC048,#E6A000);color:#fff;}
+.ctrl-rw{background:linear-gradient(135deg,#4ECDC4,#26B5AC);color:#fff;}
+.ctrl-fw{background:linear-gradient(135deg,#A29BFE,#6C5CE7);color:#fff;}
+.ctrl-mute{background:rgba(255,255,255,0.14);color:#fff;border:1.5px solid rgba(255,255,255,0.24);}
+#pdots{display:flex;gap:6px;align-items:center;margin-left:auto;}
+.sdot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.3s;}
+.sdot.done{background:#4CAF50;}
+.sdot.active{background:#E8112D;transform:scale(1.4);}
+.sdot-lbl{font-size:10px;font-weight:800;color:rgba(255,255,255,0.5);white-space:nowrap;}
+.vol-wave{display:flex;align-items:flex-end;gap:2px;height:18px;}
+.vb{width:3px;border-radius:2px;background:#4CAF50;height:4px;}
+.vol-wave.on .vb{animation:vw 0.5s ease-in-out infinite alternate;}
+.vol-wave.on .vb:nth-child(1){animation-delay:0s;}.vol-wave.on .vb:nth-child(2){animation-delay:0.13s;}.vol-wave.on .vb:nth-child(3){animation-delay:0.26s;}.vol-wave.on .vb:nth-child(4){animation-delay:0.39s;}
+@keyframes vw{from{height:3px;}to{height:16px;}}
+
+/* ── ENHANCED FEEDBACK MODAL ── */
+#fb-overlay{display:none;position:fixed;inset:0;background:rgba(5,15,5,0.9);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px 8px;}
+#fb-overlay.open{display:flex;}
+#fb-box{background:#fff;border-radius:22px;padding:26px 26px 22px;width:min(94vw,520px);box-shadow:0 24px 60px rgba(0,0,0,0.55);animation:slide-up 0.38s cubic-bezier(.34,1.56,.64,1);margin:auto;}
+@keyframes slide-up{from{transform:translateY(36px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+#fb-box h2{font-family:'Fredoka One',cursive;font-size:22px;color:#2E7D32;margin-bottom:3px;}
+.fb-sub{font-size:13px;color:#777;font-weight:600;margin-bottom:14px;}
+.fb-section{margin-bottom:14px;}
+.fb-label{font-size:12px;font-weight:900;color:#555;margin-bottom:5px;display:block;}
+.fb-emojis{display:flex;gap:8px;margin-bottom:6px;}
+.fb-e{flex:1;padding:10px 4px;border-radius:12px;border:2.5px solid #EEE;font-size:22px;text-align:center;cursor:pointer;transition:all 0.18s;background:#fafafa;}
+.fb-e:hover{transform:scale(1.07);}
+.fb-e.sel{border-color:#4CAF50;background:#F0FFF0;}
+.fb-e span{display:block;font-size:9px;font-weight:800;color:#777;margin-top:2px;}
+.star-row{display:flex;gap:6px;margin-bottom:4px;}
+.star{font-size:28px;cursor:pointer;transition:transform 0.15s;color:#ddd;}
+.star:hover,.star.lit{color:#FFD700;transform:scale(1.2);}
+.fb-input{width:100%;padding:10px 13px;border:2px solid #EEE;border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;margin-bottom:0;outline:none;transition:border-color 0.2s;}
+.fb-input:focus{border-color:#4CAF50;}
+.fb-select{width:100%;padding:10px 13px;border:2px solid #EEE;border-radius:10px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;outline:none;background:#fff;cursor:pointer;transition:border-color 0.2s;}
+.fb-select:focus{border-color:#4CAF50;}
+.fb-ta{height:72px;resize:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;}
+.fb-btns{display:flex;gap:9px;margin-top:14px;}
+#fb-send{flex:1;padding:11px;border-radius:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;transition:all 0.18s;}
+#fb-send:hover{transform:translateY(-2px);}
+#fb-cancel{padding:11px 18px;border-radius:50px;border:2px solid #EEE;background:#fff;color:#aaa;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
+#fb-thanks{display:none;text-align:center;padding:16px 0;}
+#fb-thanks .ck{font-size:52px;}
+#fb-thanks h3{font-family:'Fredoka One',cursive;font-size:20px;color:#2E7D32;margin-top:8px;}
+#fb-thanks p{font-size:13px;color:#666;font-weight:600;margin-top:6px;}
+
+.bg-intro{background:linear-gradient(155deg,#f0fff0,#e8ffe8);}
+.bg-ex{background:linear-gradient(155deg,#f5fff5,#eefff0);}
+.bg-act{background:linear-gradient(155deg,#f0fff4,#e8fff0);}
+.bg-done{background:linear-gradient(155deg,#f0fff0,#fffff0);}
+
+.tap-prompt{font-size:14px;font-weight:900;color:#E8112D;text-align:center;animation:tap-pulse 1.1s ease-in-out infinite;}
+@keyframes tap-pulse{0%,100%{opacity:0.7;transform:scale(1);}50%{opacity:1;transform:scale(1.04);}}
+
+/* ── PASSWORD GATE ── */
+#pw-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d1b0d,#1a2e1a);display:flex;align-items:center;justify-content:center;padding:20px;}
+#pw-gate.hidden{display:none;}
+#pw-card{background:linear-gradient(155deg,#f0fff0,#e8ffe8);border-radius:24px;padding:36px 32px 32px;width:min(92vw,420px);box-shadow:0 24px 70px rgba(0,0,0,0.6);text-align:center;animation:slide-up 0.5s cubic-bezier(.34,1.56,.64,1);}
+#pw-card .pw-monster{font-size:72px;line-height:1;margin-bottom:8px;}
+#pw-card h2{font-family:'Fredoka One',cursive;font-size:clamp(20px,3vw,26px);color:#1B5E20;margin-bottom:4px;}
+#pw-card .pw-sub{font-size:13px;font-weight:700;color:#666;margin-bottom:22px;}
+#pw-card .pw-hint{font-size:11px;font-weight:800;color:#999;margin-bottom:14px;line-height:1.5;background:#f5f5f5;border-radius:10px;padding:8px 12px;text-align:left;}
+#pw-card .pw-hint code{background:#e8e8e8;padding:2px 6px;border-radius:4px;font-family:'Fredoka One',cursive;font-size:12px;color:#E8112D;}
+#pw-input{width:100%;padding:14px 18px;border:3px solid #ddd;border-radius:14px;font-family:'Fredoka One',cursive;font-size:24px;text-align:center;letter-spacing:4px;text-transform:uppercase;outline:none;transition:border-color 0.25s,box-shadow 0.25s;background:#fff;color:#1B5E20;}
+#pw-input:focus{border-color:#4CAF50;box-shadow:0 0 0 4px rgba(76,175,80,0.2);}
+#pw-input.pw-wrong{border-color:#E74C3C;animation:shake 0.4s ease-in-out;background:#fff5f5;}
+#pw-btn{width:100%;margin-top:14px;padding:14px;border-radius:50px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:18px;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;box-shadow:0 4px 16px rgba(76,175,80,0.4);transition:all 0.2s;}
+#pw-btn:hover{transform:translateY(-2px);filter:brightness(1.08);}
+#pw-btn:active{transform:scale(0.97);}
+#pw-error{font-size:13px;font-weight:800;color:#E74C3C;margin-top:10px;min-height:20px;}
+body.pw-locked{overflow:hidden;}
+#main-content{width:100%;display:flex;flex-direction:column;align-items:center;flex:1;}
+#main-content.locked{pointer-events:none;}
+</style>
+</head>
+<body class="pw-locked">
+
+<!-- PASSWORD GATE -->
+<div id="pw-gate">
+  <div id="pw-card">
+    <div class="pw-monster">👾🔒</div>
+    <h2>Monster Minus is Locked!</h2>
+    <p class="pw-sub">Enter the secret password to begin the lesson</p>
+    <div class="pw-hint">
+      <strong>Password format:</strong><br>
+      Starts with <code>BP</code> + two letters describing the content + two numbers<br>
+      <em>Ask your teacher for the password!</em>
+    </div>
+    <input type="text" id="pw-input" maxlength="6" placeholder="_ _ _ _ _ _" autocomplete="off" spellcheck="false"/>
+    <button id="pw-btn" onclick="checkPW()">🔓 Unlock Lesson</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT (hidden until password correct) -->
+<div id="main-content" class="locked">
+
+<div id="stage">
+  <div class="float-sym" style="font-size:140px;left:3%;animation-delay:0s;animation-duration:13s;">−</div>
+  <div class="float-sym" style="font-size:95px;left:26%;animation-delay:4s;animation-duration:9s;">−</div>
+  <div class="float-sym" style="font-size:115px;left:59%;animation-delay:7s;animation-duration:11s;">−</div>
+  <div class="float-sym" style="font-size:80px;left:80%;animation-delay:2s;animation-duration:10s;">−</div>
+
+  <!-- ══ SCENE 0: INTRO ══ -->
+  <div class="scene active bg-intro" id="sc0">
+    <div class="hband" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+      <h1>👾 Monster Minus — Learning to Subtract!</h1>
+      <p>Grade 1 Mathematics · Subtraction · Balmoral Primary</p>
+    </div>
+    <div class="content">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;" id="avatar-wrap0">
+        <div id="avatar0"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#1B5E20;background:linear-gradient(135deg,#A5D6A7,#4CAF50);padding:4px 18px;border-radius:50px;box-shadow:0 3px 10px rgba(76,175,80,0.4);">Monster Minus</div>
+      </div>
+      <div class="monster-bubble" id="bb0"></div>
+    </div>
+    <div id="prog-wrap"><div id="prog-fill"></div></div>
+  </div>
+
+  <!-- ══ SCENE 1: CONCEPT ══ -->
+  <div class="scene bg-intro" id="sc1">
+    <div class="hband" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+      <h1>👾 Monster Minus Always Chomps!</h1>
+      <p>The − sign means we subtract — things get LESS!</p>
+    </div>
+    <div class="content">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div id="avatar1"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#1B5E20;background:linear-gradient(135deg,#A5D6A7,#4CAF50);padding:4px 18px;border-radius:50px;">Monster Minus</div>
+      </div>
+      <div class="monster-bubble" id="bb1"></div>
+      <div class="story-card">
+        <div class="story-text">When we see <span style="color:#E8112D;font-size:1.5em;font-family:'Fredoka One',cursive;">−</span> it means <strong>subtract</strong> — things get chomped and we get LESS! 👾</div>
+        <div style="margin-top:8px;font-size:13px;font-weight:800;color:#1B5E20;text-align:center;">Always put the BIGGEST number in your head first! 🧠<br>Then count BACK the smaller number with your fingers! 🖐️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 2: EXAMPLE 1 — 4 − 3 = 1 ══ -->
+  <div class="scene bg-ex" id="sc2">
+    <div class="hband" style="background:linear-gradient(135deg,#C62828,#E53935);">
+      <h1>🍎 Example 1: 4 − 3 = ?</h1>
+      <p>Watch how Monster Minus chomps the apples!</p>
+    </div>
+    <div class="content">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div id="avatar2"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#1B5E20;background:linear-gradient(135deg,#A5D6A7,#4CAF50);padding:4px 18px;border-radius:50px;">Monster Minus</div>
+      </div>
+      <div class="monster-bubble" id="bb2"></div>
+      <div class="story-card" id="story2" style="display:none;">
+        <div class="story-emoji" id="apples2" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+          <div class="fruit-item" id="fruit-a-0">🍎<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-a-1">🍎<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-a-2">🍎<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-a-3">🍎<div class="chomp-line"></div></div>
+        </div>
+        <div class="story-text">I had <strong>4</strong> apples. I ate <strong>3</strong> apples. How many apples are left? 🍎</div>
+      </div>
+      <div class="sum-display" id="sum2" style="display:none;">
+        <div class="sum-num" style="background:linear-gradient(145deg,#E53935,#C62828);">4</div>
+        <div class="sum-op">−</div>
+        <div class="sum-num" style="background:linear-gradient(145deg,#7B1FA2,#9C27B0);">3</div>
+        <div class="sum-eq">=</div>
+        <div class="sum-box" id="s2ans"></div>
+      </div>
+      <div id="working2" style="display:none;width:100%;">
+        <div class="finger-count">
+          <span style="font-size:14px;font-weight:900;color:#1B5E20;">🧠 Head:</span>
+          <div id="head2"></div>
+          <span style="font-size:14px;font-weight:900;color:#1B5E20;">🖐️ Count back:</span>
+          <div id="fingers2" style="display:flex;gap:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 3: EXAMPLE 2 — 6 − 2 = 4 ══ -->
+  <div class="scene bg-ex" id="sc3">
+    <div class="hband" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+      <h1>🍌 Example 2: 6 − 2 = ?</h1>
+      <p>Watch Monster Minus chomp the bananas!</p>
+    </div>
+    <div class="content">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div id="avatar3"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#1B5E20;background:linear-gradient(135deg,#A5D6A7,#4CAF50);padding:4px 18px;border-radius:50px;">Monster Minus</div>
+      </div>
+      <div class="monster-bubble" id="bb3"></div>
+      <div class="story-card" id="story3" style="display:none;">
+        <div class="story-emoji" id="bananas3" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+          <div class="fruit-item" id="fruit-b-0">🍌<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-b-1">🍌<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-b-2">🍌<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-b-3">🍌<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-b-4">🍌<div class="chomp-line"></div></div>
+          <div class="fruit-item" id="fruit-b-5">🍌<div class="chomp-line"></div></div>
+        </div>
+        <div class="story-text">I have <strong>6</strong> bananas. I chomp <strong>2</strong> bananas. How many bananas do I have left? 🍌</div>
+      </div>
+      <div class="sum-display" id="sum3" style="display:none;">
+        <div class="sum-num" style="background:linear-gradient(145deg,#F9A825,#F57F17);">6</div>
+        <div class="sum-op">−</div>
+        <div class="sum-num" style="background:linear-gradient(145deg,#1565C0,#1976D2);">2</div>
+        <div class="sum-eq">=</div>
+        <div class="sum-box" id="s3ans"></div>
+      </div>
+      <div id="working3" style="display:none;width:100%;">
+        <div class="finger-count">
+          <span style="font-size:14px;font-weight:900;color:#1B5E20;">🧠 Head:</span>
+          <div id="head3"></div>
+          <span style="font-size:14px;font-weight:900;color:#1B5E20;">🖐️ Count back:</span>
+          <div id="fingers3" style="display:flex;gap:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 4: ACTIVITY ══ -->
+  <div class="scene bg-act" id="sc4">
+    <div class="hband" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+      <h1>👾 Your Turn! Solve the Sums!</h1>
+      <p>Remember: biggest number in your head, count back with fingers!</p>
+    </div>
+    <div class="content">
+      <div class="monster-bubble" id="bb4" style="font-size:clamp(12px,1.5vw,15px);"></div>
+      <div class="activity-grid" id="act-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 5: WELL DONE ══ -->
+  <div class="scene bg-done" id="sc5">
+    <div class="hband" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+      <h1>🏆 Fantastic Work!</h1>
+    </div>
+    <div class="content">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div id="avatar5"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#1B5E20;background:linear-gradient(135deg,#A5D6A7,#4CAF50);padding:4px 18px;border-radius:50px;">Monster Minus</div>
+      </div>
+      <div style="font-size:52px;animation:spin-in 0.6s cubic-bezier(.34,1.56,.64,1);">🎉</div>
+      <div class="confetti-text">YOU ARE A SUBTRACTION SUPERSTAR! 👾</div>
+      <div class="monster-bubble" id="bb5"></div>
+      <div style="background:#fff;border-radius:14px;padding:10px 16px;border:2px solid #4CAF50;width:100%;max-width:600px;">
+        <div style="font-size:11px;font-weight:800;color:#2E7D32;margin-bottom:4px;">🏠 For Mum and Dad:</div>
+        <div style="font-size:13px;color:#444;font-weight:600;line-height:1.6;">Your child practised subtracting numbers today using the count-back strategy. To practise at home: use objects like coins, grapes, or buttons. Say "You have 5 grapes — I'm going to eat 2. How many are left?" Always remind her to put the biggest number in her head first, then count back with her fingers. Well done! 💕</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div id="controls-bar">
+  <button class="ctrl ctrl-play"  id="btn-start"   onclick="startVideo()">▶ Play Lesson</button>
+  <button class="ctrl ctrl-pause" id="btn-pause"   onclick="togglePause()" style="display:none;">⏸ Pause</button>
+  <button class="ctrl ctrl-mute"  id="btn-mute"    onclick="toggleMute()">🔊</button>
+  <div class="vol-wave" id="vwave"><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div></div>
+  <div id="pdots">
+    <span class="sdot-lbl">Lesson:</span>
+    <div class="sdot active" id="d0"></div><div class="sdot" id="d1"></div><div class="sdot" id="d2"></div>
+    <div class="sdot" id="d3"></div><div class="sdot" id="d4"></div><div class="sdot" id="d5"></div>
+  </div>
+  <button class="ctrl" id="btn-fb"     onclick="openFB()"     style="background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;display:none;">📋 Feedback</button>
+  <button class="ctrl" id="btn-replay" onclick="replayVideo()" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;display:none;">🔄 Play Again</button>
+</div>
+
+<!-- ENHANCED FEEDBACK MODAL -->
+<div id="fb-overlay">
+  <div id="fb-box">
+    <h2>📋 Parent Feedback for the Teacher</h2>
+    <div class="fb-sub">Please take a moment to let the teacher know how your child did with Monster Minus today!</div>
+
+    <div class="fb-section">
+      <label class="fb-label">Child's Name</label>
+      <input class="fb-input" id="fb-child" placeholder="Child's full name"/>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Parent / Guardian Name</label>
+      <input class="fb-input" id="fb-parent" placeholder="Your name"/>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Teacher's Name</label>
+      <input class="fb-input" id="fb-teacher" placeholder="Teacher's name"/>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Grade Group</label>
+      <select class="fb-select" id="fb-grade">
+        <option value="">Select…</option>
+        <option value="Grade R">Grade R</option>
+        <option value="Grade 1">Grade 1</option>
+        <option value="Grade 2">Grade 2</option>
+        <option value="Grade 3">Grade 3</option>
+      </select>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Date Completed</label>
+      <input class="fb-input" id="fb-date" type="date"/>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Lesson Completion</label>
+      <select class="fb-select" id="fb-completion">
+        <option value="">Select…</option>
+        <option value="full">✅ Completed the full lesson</option>
+        <option value="paused">⏸ Completed with many pauses</option>
+        <option value="retry">🔄 Did not complete — will retry</option>
+      </select>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">How well did your child understand subtraction? ⭐</label>
+      <div class="star-row" id="star-row">
+        <span class="star" onclick="setStar(1)">★</span>
+        <span class="star" onclick="setStar(2)">★</span>
+        <span class="star" onclick="setStar(3)">★</span>
+        <span class="star" onclick="setStar(4)">★</span>
+        <span class="star" onclick="setStar(5)">★</span>
+      </div>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Did your child use the "biggest number in head, count back" strategy?</label>
+      <select class="fb-select" id="fb-strategy">
+        <option value="">Select…</option>
+        <option value="independent">✨ Yes — used it independently</option>
+        <option value="helped">👍 Used it with a little help</option>
+        <option value="inconsistent">🤔 Not consistently</option>
+        <option value="unsure">❓ Not sure</option>
+      </select>
+    </div>
+
+    <div class="fb-section">
+      <label class="fb-label">Additional Comments or Questions for the Teacher</label>
+      <textarea class="fb-input fb-ta" id="fb-note" placeholder="Any comments, questions or concerns for the teacher?"></textarea>
+    </div>
+
+    <div class="fb-btns">
+      <button id="fb-cancel" onclick="closeFB()">Cancel</button>
+      <button id="fb-send"   onclick="sendFB()">📤 Submit Feedback</button>
+    </div>
+
+    <div id="fb-thanks">
+      <div class="ck">🎉</div>
+      <h3>Thank You!</h3>
+      <p>Your feedback has been noted. Thank you for supporting your child's learning today!</p>
+      <p style="margin-top:8px;font-size:20px;">👾 ⭐ 🎊</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// MONSTER MINUS AVATAR — cute Monsters Inc style
+// ══════════════════════════════════════════════════════
+function monsterSVG(talking=false, size=170){
+  const h=size*1.5;
+  return `<svg width="${size}" height="${h}" viewBox="0 0 170 255" xmlns="http://www.w3.org/2000/svg">
+  <!-- shadow -->
+  <ellipse cx="85" cy="250" rx="45" ry="6" fill="rgba(0,0,0,0.18)"/>
+
+  <!-- BODY — round big fluffy monster body -->
+  <ellipse cx="85" cy="165" rx="52" ry="58" fill="#2ECC71"/>
+  <!-- body fur texture shading -->
+  <ellipse cx="85" cy="165" rx="50" ry="56" fill="none" stroke="#27AE60" stroke-width="2" opacity="0.5"/>
+  <!-- belly lighter patch -->
+  <ellipse cx="85" cy="172" rx="32" ry="36" fill="#A9DFBF" opacity="0.7"/>
+
+  <!-- LEGS -->
+  <ellipse cx="65" cy="222" rx="18" ry="14" fill="#27AE60"/>
+  <ellipse cx="105" cy="222" rx="18" ry="14" fill="#27AE60"/>
+  <!-- feet / claws -->
+  <ellipse cx="55" cy="232" rx="11" ry="7" fill="#1E8449"/>
+  <ellipse cx="69" cy="235" rx="11" ry="7" fill="#1E8449"/>
+  <ellipse cx="96" cy="235" rx="11" ry="7" fill="#1E8449"/>
+  <ellipse cx="114" cy="232" rx="11" ry="7" fill="#1E8449"/>
+
+  <!-- LEFT ARM — without claws first so claws can go on top of sign -->
+  <path d="M38 145 Q18 145 12 158 Q8 168 18 175 Q28 182 40 170" fill="#27AE60" stroke="#1E8449" stroke-width="1.5"/>
+
+  <!-- RIGHT ARM — same -->
+  <path d="M132 145 Q152 145 158 158 Q162 168 152 175 Q142 182 130 170" fill="#27AE60" stroke="#1E8449" stroke-width="1.5"/>
+
+  <!-- BIG RED MINUS SIGN — now held in hands at arm level -->
+  <rect x="10" y="162" width="150" height="26" rx="10" fill="#E8112D"/>
+  <rect x="8"  y="160" width="154" height="30" rx="11" fill="none" stroke="#FF6B6B" stroke-width="2.5"/>
+  <rect x="12" y="164" width="146" height="18" rx="8" fill="#FF1744" opacity="0.5"/>
+  <rect x="18" y="167" width="48"  height="5"  rx="3" fill="rgba(255,255,255,0.3)"/>
+
+  <!-- LEFT HAND claws — drawn ON TOP of minus sign so they grip it -->
+  <ellipse cx="16" cy="172" rx="10" ry="8" fill="#2ECC71"/>
+  <ellipse cx="8"  cy="167" rx="7"  ry="5" fill="#1E8449"/>
+  <ellipse cx="7"  cy="178" rx="7"  ry="5" fill="#1E8449"/>
+  <ellipse cx="15" cy="182" rx="7"  ry="5" fill="#1E8449"/>
+
+  <!-- RIGHT HAND claws — drawn ON TOP of minus sign -->
+  <ellipse cx="154" cy="172" rx="10" ry="8" fill="#2ECC71"/>
+  <ellipse cx="162" cy="167" rx="7"  ry="5" fill="#1E8449"/>
+  <ellipse cx="163" cy="178" rx="7"  ry="5" fill="#1E8449"/>
+  <ellipse cx="155" cy="182" rx="7"  ry="5" fill="#1E8449"/>
+
+  <!-- HEAD -->
+  <ellipse cx="85" cy="90" rx="46" ry="48" fill="#2ECC71"/>
+  <!-- head shading -->
+  <ellipse cx="85" cy="90" rx="44" ry="46" fill="none" stroke="#27AE60" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- HORNS — cute small ones -->
+  <ellipse cx="62" cy="46" rx="10" ry="16" fill="#27AE60" transform="rotate(-15 62 46)"/>
+  <ellipse cx="63" cy="43" rx="6" ry="11" fill="#A9DFBF" opacity="0.6" transform="rotate(-15 63 43)"/>
+  <ellipse cx="108" cy="46" rx="10" ry="16" fill="#27AE60" transform="rotate(15 108 46)"/>
+  <ellipse cx="107" cy="43" rx="6" ry="11" fill="#A9DFBF" opacity="0.6" transform="rotate(15 107 43)"/>
+
+  <!-- EYES — big cute expressive eyes (Monsters Inc style) -->
+  <!-- left eye white -->
+  <ellipse cx="65" cy="82" rx="18" ry="20" fill="#fff"/>
+  <!-- right eye white -->
+  <ellipse cx="105" cy="82" rx="18" ry="20" fill="#fff"/>
+  <!-- left iris - big yellow -->
+  <ellipse cx="65" cy="82" rx="13" ry="14" fill="#F9A825"/>
+  <!-- right iris -->
+  <ellipse cx="105" cy="82" rx="13" ry="14" fill="#F9A825"/>
+  <!-- left pupil -->
+  <ellipse cx="65" cy="83" rx="8" ry="9" fill="#1A1A1A"/>
+  <!-- right pupil -->
+  <ellipse cx="105" cy="83" rx="8" ry="9" fill="#1A1A1A"/>
+  <!-- eye shine left -->
+  <circle cx="69" cy="78" r="3.5" fill="#fff"/>
+  <circle cx="61" cy="85" r="2" fill="rgba(255,255,255,0.5)"/>
+  <!-- eye shine right -->
+  <circle cx="109" cy="78" r="3.5" fill="#fff"/>
+  <circle cx="101" cy="85" r="2" fill="rgba(255,255,255,0.5)"/>
+  <!-- eyelids for expressiveness -->
+  <path d="M48 72 Q65 62 82 72" fill="none" stroke="#1E8449" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M88 72 Q105 62 122 72" fill="none" stroke="#1E8449" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- NOSE — cute little button -->
+  <ellipse cx="85" cy="100" rx="7" ry="5" fill="#1E8449"/>
+  <ellipse cx="83" cy="98" rx="3" ry="2" fill="rgba(255,255,255,0.3)"/>
+
+  <!-- MOUTH — chomping open or smiling -->
+  ${talking
+    ? `<!-- CHOMPING MOUTH — wide open showing teeth -->
+       <path d="M58 115 Q85 130 112 115" fill="#1A1A1A"/>
+       <path d="M58 115 Q85 108 112 115" fill="#E8F5E9"/>
+       <!-- top teeth -->
+       <rect x="62" y="108" width="12" height="11" rx="3" fill="#fff"/>
+       <rect x="79" y="107" width="12" height="12" rx="3" fill="#fff"/>
+       <rect x="96" y="108" width="12" height="11" rx="3" fill="#fff"/>
+       <!-- bottom teeth -->
+       <rect x="68" y="120" width="10" height="9" rx="3" fill="#fff"/>
+       <rect x="83" y="121" width="10" height="8" rx="3" fill="#fff"/>
+       <!-- tongue -->
+       <ellipse cx="85" cy="127" rx="14" ry="8" fill="#E8112D"/>
+       <ellipse cx="85" cy="125" rx="10" ry="5" fill="#C62828" opacity="0.5"/>`
+    : `<!-- HAPPY SMILE -->
+       <path d="M62 112 Q85 130 108 112" fill="#1A1A1A"/>
+       <path d="M62 112 Q85 120 108 112" fill="#E8F5E9"/>
+       <!-- small visible teeth -->
+       <rect x="68" y="112" width="10" height="8" rx="2" fill="#fff"/>
+       <rect x="82" y="111" width="10" height="9" rx="2" fill="#fff"/>
+       <rect x="96" y="112" width="10" height="8" rx="2" fill="#fff"/>`
+  }
+
+  <!-- SPOTS on body — cute decoration -->
+  <circle cx="68" cy="160" r="8" fill="#27AE60" opacity="0.6"/>
+  <circle cx="102" cy="155" r="6" fill="#27AE60" opacity="0.6"/>
+  <circle cx="80" cy="185" r="5" fill="#27AE60" opacity="0.5"/>
+  </svg>`;
+}
+
+function injectAvatars(){
+  ['avatar0','avatar1','avatar2','avatar3','avatar5'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=monsterSVG(false,160);
+  });
+}
+function setTalkingAvatar(scIdx,yes){
+  const el=document.getElementById('avatar'+scIdx);
+  if(el) el.innerHTML=monsterSVG(yes,160);
+}
+
+// ══════════════════════════════════════════════════════
+// AUDIO
+// ══════════════════════════════════════════════════════
+function bubbleSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [0,0.09,0.18,0.27,0.36].forEach((t,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(500+i*70,ctx.currentTime+t);
+      o.frequency.exponentialRampToValueAtTime(250+i*35,ctx.currentTime+t+0.13);
+      g.gain.setValueAtTime(0.14,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.16);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.16);
+    });
+  }catch(e){}
+}
+function chomp(){
+  // satisfying chomp sound
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(200,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(80,ctx.currentTime+0.18);
+    g.gain.setValueAtTime(0.2,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.22);
+  }catch(e){}
+}
+function beep(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='square';o.frequency.value=380;
+    g.gain.setValueAtTime(0.14,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.32);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.32);
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let muted=false,paused=false,playing=false,currentSc=0;
+let bTimer=null,starRating=0,selEmoji='';
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+async function waitPause(){while(paused)await delay(100);}
+
+// ══════════════════════════════════════════════════════
+// SPEECH — bulletproof cross-device version
+// Fixes two known Android/mobile Chrome bugs:
+//   1. Must "unlock" speechSynthesis synchronously on first user tap
+//   2. Must wait 50ms after cancel() before calling speak() or it goes silent
+// ══════════════════════════════════════════════════════
+
+let cachedVoices=[];
+let speechReady=false;
+
+// Called SYNCHRONOUSLY inside the Play button click handler
+// before any await — this is what unlocks audio on mobile
+function unlockSpeech(){
+  if(speechReady||!window.speechSynthesis) return;
+  speechReady=true;
+  // Refresh voice list
+  cachedVoices=window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged=()=>{
+    cachedVoices=window.speechSynthesis.getVoices();
+  };
+  // Speak a silent empty utterance to unlock audio context
+  const u=new SpeechSynthesisUtterance(' ');
+  u.volume=0; u.rate=2;
+  window.speechSynthesis.speak(u);
+}
+
+function pickVoice(){
+  const vs=cachedVoices.length
+    ? cachedVoices
+    : (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
+  const want=['Daniel','Google UK English Male','Microsoft David','Alex','Fred','Thomas','George'];
+  for(const nm of want){ const f=vs.find(x=>x.name.includes(nm)); if(f) return f; }
+  return vs.find(x=>x.lang.startsWith('en')&&x.name.toLowerCase().includes('male'))
+      || vs.find(x=>x.lang.startsWith('en'))
+      || vs[0]
+      || null;
+}
+
+// Lip sync
+let lipSyncTimer=null;
+function startLipSync(scIdx){
+  stopLipSync();
+  let s=false;
+  setTalkingAvatar(scIdx,true);
+  lipSyncTimer=setInterval(()=>{
+    s=!s;
+    const el=document.getElementById('avatar'+scIdx);
+    if(el) el.innerHTML=monsterSVG(s,160);
+  },150);
+}
+function stopLipSync(){
+  if(lipSyncTimer){clearInterval(lipSyncTimer);lipSyncTimer=null;}
+}
+
+function speak(text,scIdx){
+  return new Promise(resolve=>{
+    setBubble(scIdx,text);
+    startLipSync(scIdx);
+    const vw=document.getElementById('vwave');
+    if(vw) vw.classList.add('on');
+
+    function finish(){
+      stopLipSync();
+      setTalkingAvatar(scIdx,false);
+      if(vw) vw.classList.remove('on');
+      resolve();
+    }
+
+    if(muted||!window.speechSynthesis){
+      // No TTS — just time it by word count so scene pacing still feels right
+      setTimeout(finish, text.split(' ').length*300+600);
+      return;
+    }
+
+    // Cancel any previous utterance
+    window.speechSynthesis.cancel();
+
+    // ── Critical Android fix: wait 50ms after cancel before speaking ──
+    // Without this delay, the utterance starts but produces no audio on Chrome mobile
+    setTimeout(()=>{
+      const u=new SpeechSynthesisUtterance(text);
+      u.rate=0.82; u.pitch=0.5; u.volume=1;
+      const v=pickVoice(); if(v) u.voice=v;
+
+      // Safety timeout — if onend never fires (silent failure), move on anyway
+      const safety=setTimeout(finish, Math.max(4000, text.split(' ').length*650));
+
+      u.onend  =()=>{ clearTimeout(safety); finish(); };
+      u.onerror=()=>{ clearTimeout(safety); finish(); };
+
+      window.speechSynthesis.speak(u);
+      if(typeof playGrowlLayer==='function') playGrowlLayer(); // low growl layer fires AFTER speech starts
+    }, 50);
+  });
+}
+
+// Count-back numbers — same fix applied
+async function speakNum(num,scIdx){
+  if(muted||!window.speechSynthesis){ await delay(500); return; }
+  window.speechSynthesis.cancel();
+  await delay(50);
+  await new Promise(resolve=>{
+    const u=new SpeechSynthesisUtterance(String(num));
+    u.rate=0.76; u.pitch=0.5; u.volume=1;
+    const v=pickVoice(); if(v) u.voice=v;
+    const safety=setTimeout(resolve,2000);
+    u.onend  =()=>{ clearTimeout(safety); resolve(); };
+    u.onerror=()=>{ clearTimeout(safety); resolve(); };
+    window.speechSynthesis.speak(u);
+  });
+}
+
+function stopSpeech(){
+  stopLipSync();
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  const vw=document.getElementById('vwave'); if(vw) vw.classList.remove('on');
+}
+
+function setBubble(idx,text){
+  const el=document.getElementById('bb'+idx); if(!el) return;
+  el.innerHTML=''; const words=text.split(' '); let i=0;
+  if(bTimer) clearInterval(bTimer);
+  const pace=Math.max(50,(text.length*50)/words.length);
+  bTimer=setInterval(()=>{
+    if(i<words.length){ el.innerHTML=words.slice(0,i+1).join(' ')+'<span style="display:inline-block;width:2px;height:15px;background:#4CAF50;vertical-align:middle;margin-left:2px;"></span>'; i++; }
+    else{ clearInterval(bTimer); el.innerHTML=text; }
+  },pace);
+}
+
+// ══════════════════════════════════════════════════════
+// SCENE MANAGEMENT
+// ══════════════════════════════════════════════════════
+function goScene(idx){
+  document.querySelectorAll('.scene').forEach(s=>{s.classList.remove('active');s.style.display='none';});
+  const el=document.getElementById('sc'+idx); if(el){ el.classList.add('active'); el.style.display='flex'; }
+  currentSc=idx;
+  for(let i=0;i<6;i++){const d=document.getElementById('d'+i);if(!d)continue;d.classList.remove('active','done');if(i<idx)d.classList.add('done');else if(i===idx)d.classList.add('active');}
+  const pf=document.getElementById('prog-fill'); if(pf) pf.style.width=((idx/5)*100)+'%';
+}
+
+// ══════════════════════════════════════════════════════
+// CONTROLS — Pause/Resume only (no rewind/forward)
+// ══════════════════════════════════════════════════════
+function togglePause(){
+  paused=!paused;
+  const btn=document.getElementById('btn-pause');
+  if(paused){
+    btn.textContent='▶ Resume';
+    if(window.speechSynthesis) window.speechSynthesis.pause();
+    stopLipSync();
+    setTalkingAvatar(currentSc,false);
+  } else {
+    btn.textContent='⏸ Pause';
+    if(window.speechSynthesis) window.speechSynthesis.resume();
+  }
+}
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';
+  if(muted) stopSpeech();
+}
+
+// ══════════════════════════════════════════════════════
+// MAIN FLOW
+// ══════════════════════════════════════════════════════
+async function startVideo(){
+  if(playing) return;
+  unlockSpeech(); // must happen synchronously on the user tap — before any await
+  playing=true;
+  document.getElementById('btn-start').style.display='none';
+  document.getElementById('btn-pause').style.display='inline-flex';
+  await runFrom(0);
+}
+async function runFrom(start){
+  for(let sc=start;sc<6;sc++){
+    if(!playing) return;
+    await waitPause();
+    if(sc===0) await sc0();
+    else if(sc===1) await sc1();
+    else if(sc===2) await sc2();
+    else if(sc===3) await sc3();
+    else if(sc===4) await sc4();
+    else if(sc===5) await sc5();
+    if(!playing) return;
+    await delay(280);
+  }
+  if(playing){
+    document.getElementById('btn-fb').style.display='inline-flex';
+    document.getElementById('btn-replay').style.display='inline-flex';
+    document.getElementById('btn-pause').style.display='none';
+    playing=false;
+  }
+}
+async function replayVideo(){
+  stopSpeech(); playing=false; paused=false;
+  document.getElementById('btn-fb').style.display='none';
+  document.getElementById('btn-replay').style.display='none';
+  document.getElementById('btn-pause').textContent='⏸ Pause';
+  await delay(300); startVideo();
+}
+
+// ══════════════════════════════════════════════════════
+// CHOMP FRUIT — sweeps a red line through a fruit item
+// ══════════════════════════════════════════════════════
+function chompFruit(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  // tiny delay so it triggers after the CSS transition engine is ready
+  requestAnimationFrame(()=>{
+    el.classList.add('chomped');
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// SCENE 0: INTRO
+// ══════════════════════════════════════════════════════
+async function sc0(){
+  goScene(0);await delay(350);
+  await speak(`Hello there, little one!`,0);
+  await delay(800);await waitPause();
+  await speak(`Don't be frightened — I am Monster Minus, and I am actually very friendly!`,0);
+  await delay(800);await waitPause();
+  await speak(`Well... friendly-ish. You see, I like to chomp everything I see.`,0);
+  await delay(700);await waitPause();
+  chomp();
+  await speak(`Chomp! Chomp!`,0);
+  await delay(800);await waitPause();
+  await speak(`And when I chomp things, they get less.`,0);
+  await delay(800);await waitPause();
+  await speak(`That big red sign I'm holding? That is the minus sign. And minus always means less.`,0);
+  await delay(900);await waitPause();
+  await speak(`Are you ready to learn about minus with me?`,0);
+  await delay(700);await waitPause();
+  await speak(`Let's go! Chomp chomp!`,0);
+}
+
+// ══════════════════════════════════════════════════════
+// SCENE 1: CONCEPT
+// ══════════════════════════════════════════════════════
+async function sc1(){
+  goScene(1);await delay(300);
+  await speak(`Now listen carefully, little mathematician!`,1);
+  await delay(800);await waitPause();
+  await speak(`When we see the minus sign, things get chomped — and we get less!`,1);
+  await delay(800);await waitPause();
+  await speak(`To find the answer, we count back.`,1);
+  await delay(700);await waitPause();
+  await speak(`Can you remember what we do when things get less?`,1);
+  await delay(1800);await waitPause();
+  await speak(`Yes! We count back!`,1);
+  await delay(800);await waitPause();
+  await speak(`And here is my special tip.`,1);
+  await delay(700);await waitPause();
+  await speak(`Always put the biggest number in your head first.`,1);
+  await delay(800);await waitPause();
+  await speak(`Then count back the smaller number using your fingers.`,1);
+  await delay(800);await waitPause();
+  await speak(`Let me show you how!`,1);
+}
+
+// ══════════════════════════════════════════════════════
+// SCENE 2: EXAMPLE 1 — 4 − 3 = 1
+// ══════════════════════════════════════════════════════
+async function sc2(){
+  goScene(2);await delay(300);
+  await speak(`Here is my first story!`,2);
+  await delay(700);await waitPause();
+  await speak(`I had 4 apples.`,2);
+  await delay(700);await waitPause();
+  chomp();await delay(200);
+  await speak(`I ate 3 of them. Chomp chomp chomp!`,2);
+  await delay(800);await waitPause();
+  await speak(`How many apples do I have left?`,2);
+  await delay(1000);await waitPause();
+
+  document.getElementById('story2').style.display='block';
+  await delay(500);await waitPause();
+  await speak(`Let's write this as a sum!`,2);
+
+  document.getElementById('sum2').style.display='flex';
+  await delay(600);await waitPause();
+
+  await speak(`Four minus three equals... let's find out!`,2);
+  await delay(700);await waitPause();
+  await speak(`Which is the biggest number?`,2);
+  await delay(700);await waitPause();
+  await speak(`It's four! So we put four in our head.`,2);
+
+  await delay(400);
+  bubbleSound();
+  const headEl=document.getElementById('head2');
+  headEl.innerHTML=`<div class="num-in-head" style="background:linear-gradient(145deg,#E53935,#C62828);">4</div><span style="font-size:20px;margin-left:4px;">🧠</span>`;
+  document.getElementById('working2').style.display='block';
+  await delay(800);await waitPause();
+
+  await speak(`Four is in our head!`,2);
+  await delay(700);await waitPause();
+  await speak(`Now I hold up 3 fingers on my other hand, and I count back from four.`,2);
+  await delay(700);await waitPause();
+
+  const fingersEl=document.getElementById('fingers2');
+  const countBacks=['3','2','1'];
+  const fColors=['#E74C3C','#E67E22','#F39C12'];
+  // Cross out apples from back to front: index 3 (4th), then 2 (3rd), then 1 (2nd)
+  const chompApples=[3,2,1];
+  for(let i=0;i<3;i++){
+    await waitPause();
+    const span=document.createElement('div');
+    span.className='finger-num';
+    span.style.background=`linear-gradient(145deg,${fColors[i]},${fColors[i]}aa)`;
+    span.style.color='#fff';
+    span.textContent=countBacks[i];
+    fingersEl.appendChild(span);
+    // Sweep the red line through the apple as we count back
+    chompFruit('fruit-a-'+chompApples[i]);
+    await speakNum(countBacks[i],2);
+    await delay(400);
+  }
+
+  await delay(400);await waitPause();
+  document.getElementById('s2ans').textContent='1';
+  document.getElementById('s2ans').classList.add('revealed');
+  await speak(`One!`,2);
+  await delay(700);await waitPause();
+  await speak(`I have one apple left.`,2);
+  await delay(700);await waitPause();
+  await speak(`Four minus three equals one.`,2);
+  await delay(800);await waitPause();
+  await speak(`Well done for watching so carefully!`,2);
+}
+
+// ══════════════════════════════════════════════════════
+// SCENE 3: EXAMPLE 2 — 6 − 2 = 4
+// ══════════════════════════════════════════════════════
+async function sc3(){
+  goScene(3);await delay(300);
+  await speak(`Wonderful! Now for my second story!`,3);
+  await delay(700);await waitPause();
+  await speak(`I have 6 bananas.`,3);
+  await delay(700);await waitPause();
+  chomp();await delay(200);
+  await speak(`I chomp 2 of them. Chomp chomp!`,3);
+  await delay(800);await waitPause();
+  await speak(`How many bananas do I have left to eat later?`,3);
+  await delay(1000);await waitPause();
+
+  document.getElementById('story3').style.display='block';
+  await delay(500);await waitPause();
+  await speak(`Let's write the sum.`,3);
+
+  document.getElementById('sum3').style.display='flex';
+  await delay(600);await waitPause();
+
+  await speak(`Six minus two equals... let's work it out!`,3);
+  await delay(700);await waitPause();
+  await speak(`Which is the biggest number?`,3);
+  await delay(700);await waitPause();
+  await speak(`It's six! Six goes in our head.`,3);
+
+  await delay(400);
+  bubbleSound();
+  const headEl=document.getElementById('head3');
+  headEl.innerHTML=`<div class="num-in-head" style="background:linear-gradient(145deg,#F9A825,#F57F17);">6</div><span style="font-size:20px;margin-left:4px;">🧠</span>`;
+  document.getElementById('working3').style.display='block';
+  await delay(800);await waitPause();
+
+  await speak(`Six is in our head!`,3);
+  await delay(700);await waitPause();
+  await speak(`Now I hold up 2 fingers, and count back from six.`,3);
+  await delay(700);await waitPause();
+
+  const fingersEl=document.getElementById('fingers3');
+  const countBacks=['5','4'];
+  const fColors=['#E74C3C','#9B59B6'];
+  // Cross out bananas from back to front: index 5 (6th), then index 4 (5th)
+  const chompBananas=[5,4];
+  for(let i=0;i<2;i++){
+    await waitPause();
+    const span=document.createElement('div');
+    span.className='finger-num';
+    span.style.background=`linear-gradient(145deg,${fColors[i]},${fColors[i]}aa)`;
+    span.style.color='#fff';
+    span.textContent=countBacks[i];
+    fingersEl.appendChild(span);
+    // Sweep the red line through the banana as we count back
+    chompFruit('fruit-b-'+chompBananas[i]);
+    await speakNum(countBacks[i],3);
+    await delay(400);
+  }
+
+  await delay(400);await waitPause();
+  document.getElementById('s3ans').textContent='4';
+  document.getElementById('s3ans').classList.add('revealed');
+  await speak(`Four!`,3);
+  await delay(700);await waitPause();
+  await speak(`I will have 4 bananas left to eat later.`,3);
+  await delay(700);await waitPause();
+  await speak(`Six minus two equals four.`,3);
+  await delay(800);await waitPause();
+  await speak(`You're doing brilliantly!`,3);
+}
+
+// ══════════════════════════════════════════════════════
+// SCENE 4: ACTIVITY
+// ══════════════════════════════════════════════════════
+const SUMS=[
+  {a:5,b:3,ans:2},{a:4,b:2,ans:2},{a:3,b:3,ans:0},
+  {a:6,b:4,ans:2},{a:3,b:1,ans:2},{a:7,b:3,ans:4}
+];
+const SUMCOLORS=[
+  ['#E53935','#7B1FA2'],['#1565C0','#2E7D32'],['#E53935','#1565C0'],
+  ['#F57F17','#7B1FA2'],['#2E7D32','#E53935'],['#7B1FA2','#1565C0']
+];
+
+async function sc4(){
+  goScene(4);await delay(300);
+  await speak(`Now it's your turn, little mathematician!`,4);
+  await delay(800);await waitPause();
+  await speak(`I have six sums for you to solve all by yourself.`,4);
+  await delay(800);await waitPause();
+  await speak(`Remember my rule.`,4);
+  await delay(600);await waitPause();
+  await speak(`Put the biggest number in your head.`,4);
+  await delay(700);await waitPause();
+  await speak(`Then count back the smaller number on your fingers.`,4);
+  await delay(800);await waitPause();
+  await speak(`Ask Mum or Dad to help you count correctly.`,4);
+  await delay(800);await waitPause();
+  await speak(`Off you go — I believe in you! Chomp!`,4);
+
+  const grid=document.getElementById('act-grid');
+  grid.innerHTML='';
+  SUMS.forEach((sum,idx)=>{
+    const[c1,c2]=SUMCOLORS[idx];
+    const card=document.createElement('div');
+    card.className='act-card';card.id=`actcard${idx}`;
+    const biggest=Math.max(sum.a,sum.b);
+    const smallest=Math.min(sum.a,sum.b);
+    card.innerHTML=`
+      <div class="act-sum-row">
+        <div class="act-num" style="background:linear-gradient(145deg,${c1},${c1}cc);color:#fff;width:52px;height:58px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;">${sum.a}</div>
+        <div class="act-op">−</div>
+        <div class="act-num" style="background:linear-gradient(145deg,${c2},${c2}cc);color:#fff;width:52px;height:58px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;">${sum.b}</div>
+        <div class="act-eq">=</div>
+        <input class="act-input" id="inp${idx}" type="number" min="0" max="20" placeholder="?" inputmode="numeric" pattern="[0-9]*"/>
+      </div>
+      <div class="act-hint" id="hint${idx}">🧠 Put ${biggest} in your head — count back ${smallest} finger${smallest===1?'':'s'}!</div>
+      <button class="check-btn" id="chk${idx}" onclick="checkAns(${idx},${sum.ans})">✅ Check!</button>
+    `;
+    grid.appendChild(card);
+  });
+
+  await waitAllCorrect();
+  await delay(400);await waitPause();
+  await speak(`Roooar! Well done!`,4);
+  await delay(700);await waitPause();
+  await speak(`You solved all of the sums!`,4);
+  await delay(700);await waitPause();
+  await speak(`You are a truly brilliant mathematician, and Monster Minus is very proud of you!`,4);
+}
+
+function checkAns(idx,correct){
+  const inp=document.getElementById('inp'+idx);
+  const card=document.getElementById('actcard'+idx);
+  const hint=document.getElementById('hint'+idx);
+  const btn=document.getElementById('chk'+idx);
+  const val=parseInt(inp.value);
+  if(isNaN(val)||inp.value.trim()===''){hint.textContent='Please type a number first!';hint.classList.add('show-hint');return;}
+  if(val===correct){
+    inp.classList.remove('wrong');inp.classList.add('correct');
+    card.classList.remove('wrong-state');card.classList.add('correct');
+    hint.textContent='✅ Correct! Brilliant!';hint.classList.remove('show-hint');
+    btn.disabled=true;inp.disabled=true;
+    solvedCount++;
+    if(solvedCount===SUMS.length&&solvedResolve)solvedResolve();
+  }else{
+    inp.classList.remove('correct');inp.classList.add('wrong');
+    card.classList.remove('correct');card.classList.add('wrong-state');
+    beep();
+    const biggest=Math.max(SUMS[idx].a,SUMS[idx].b);
+    const smallest=Math.min(SUMS[idx].a,SUMS[idx].b);
+    hint.textContent=`Not quite! Ask Mum or Dad to help. Put ${biggest} in your head, count back ${smallest}!`;
+    hint.classList.add('show-hint');
+    setTimeout(()=>{inp.classList.remove('wrong');card.classList.remove('wrong-state');},650);
+  }
+}
+let solvedCount=0,solvedResolve=null;
+function waitAllCorrect(){solvedCount=0;return new Promise(r=>{solvedResolve=r;});}
+
+// ══════════════════════════════════════════════════════
+// SCENE 5: WELL DONE
+// ══════════════════════════════════════════════════════
+async function sc5(){
+  goScene(5);await delay(300);
+  await speak(`Oh yes! Oh yes! Oh yes!`,5);
+  await delay(700);await waitPause();
+  await speak(`What an absolutely fantastic performance!`,5);
+  await delay(800);await waitPause();
+  await speak(`You have mastered the minus sign — the most powerful chomp in all of mathematics!`,5);
+  await delay(900);await waitPause();
+  await speak(`You know that minus means less.`,5);
+  await delay(700);await waitPause();
+  await speak(`You know to put the biggest number in your head, and count back with your fingers.`,5);
+  await delay(900);await waitPause();
+  await speak(`Monster Minus takes a big bow just for you.`,5);
+  await delay(700);await waitPause();
+  await speak(`You are a true subtraction superstar!`,5);
+  await delay(900);await waitPause();
+  await speak(`Until next time — keep counting, keep learning, and watch out for my chomp! Chomp!`,5);
+  await delay(700);await waitPause();
+  await speak(`Goodbye!`,5);
+}
+
+// ══════════════════════════════════════════════════════
+// FEEDBACK
+// ══════════════════════════════════════════════════════
+function openFB(){
+  document.getElementById('fb-overlay').classList.add('open');
+  document.getElementById('fb-thanks').style.display='none';
+  document.querySelector('.fb-btns').style.display='flex';
+  // pre-fill today's date
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('fb-date').value=today;
+}
+function closeFB(){document.getElementById('fb-overlay').classList.remove('open');}
+function setStar(n){
+  starRating=n;
+  document.querySelectorAll('.star').forEach((s,i)=>i<n?s.classList.add('lit'):s.classList.remove('lit'));
+}
+function sendFB(){
+  const child=document.getElementById('fb-child').value.trim();
+  const parent=document.getElementById('fb-parent').value.trim();
+  const teacher=document.getElementById('fb-teacher').value.trim();
+  const grade=document.getElementById('fb-grade').value;
+  const date=document.getElementById('fb-date').value;
+  const completion=document.getElementById('fb-completion').value;
+  const strategy=document.getElementById('fb-strategy').value;
+  const note=document.getElementById('fb-note').value.trim();
+
+  const completionLabels={'full':'✅ Completed the full lesson','paused':'⏸ Completed with many pauses','retry':'🔄 Did not complete — will retry'};
+  const strategyLabels={'independent':'✨ Yes — independently','helped':'👍 With a little help','inconsistent':'🤔 Not consistently','unsure':'❓ Not sure'};
+  const stars=starRating?'⭐'.repeat(starRating)+` (${starRating}/5)`:'Not rated';
+
+  const msg=`📋 *Monster Minus Feedback — Balmoral Primary*\n`+
+    `👦 Child: ${child||'(not given)'}\n`+
+    `👤 Parent: ${parent||'(not given)'}\n`+
+    `🧑‍🏫 Teacher: ${teacher||'(not given)'}\n`+
+    `🏫 Grade Group: ${grade||'(not given)'}\n`+
+    `📅 Date: ${date||'(not given)'}\n`+
+    `📚 Lesson: Subtraction (Minus) – Grade 1\n`+
+    `🏁 Completion: ${completionLabels[completion]||'(not selected)'}\n`+
+    `⭐ Understanding: ${stars}\n`+
+    `🧠 Strategy used: ${strategyLabels[strategy]||'(not selected)'}\n`+
+    (note?`💬 Comments: ${note}`:'');
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  document.getElementById('fb-thanks').style.display='block';
+  document.querySelector('.fb-btns').style.display='none';
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+injectAvatars();
+</script>
+
+</div><!-- END #main-content -->
+
+<script>
+// ══════════════════════════════════════════════════════
+// PASSWORD GATE
+// ══════════════════════════════════════════════════════
+const CORRECT_PW='BPMS24';
+const pwInput=document.getElementById('pw-input');
+const pwError=document.getElementById('pw-error');
+
+function checkPW(){
+  const val=pwInput.value.trim().toUpperCase();
+  if(val===CORRECT_PW){
+    document.getElementById('pw-gate').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('locked');
+    document.body.classList.remove('pw-locked');
+    pwError.textContent='';
+  }else{
+    pwInput.classList.add('pw-wrong');
+    pwError.textContent='❌ Incorrect password. Please try again!';
+    setTimeout(()=>pwInput.classList.remove('pw-wrong'),450);
+  }
+}
+pwInput.addEventListener('keydown',function(e){if(e.key==='Enter')checkPW();});
+pwInput.focus();
+</script>
+</body>
+</html>
